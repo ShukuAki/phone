@@ -12,9 +12,10 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface VaultPageProps {
   onPlayTrack: (track: Track) => void;
+  darkMode?: boolean;
 }
 
-export default function VaultPage({ onPlayTrack }: VaultPageProps) {
+export default function VaultPage({ onPlayTrack, darkMode = false }: VaultPageProps) {
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
   const [playlistTracks, setPlaylistTracks] = useState<Track[]>([]);
   const [currentPlayingTrack, setCurrentPlayingTrack] = useState<Track | null>(null);
@@ -215,18 +216,18 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
 
   return (
     <div className="min-h-screen pb-20">
-      <header className="bg-darkgray sticky top-0 z-10 shadow-md">
+      <header className={`${darkMode ? 'bg-gray-800' : 'bg-white'} sticky top-0 z-10 shadow-md opacity-100`}>
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-white">The Vault</h1>
+          <h1 className={`text-2xl font-semibold lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>the vault</h1>
           <div className="flex space-x-3">
             <button 
-              className="text-white p-2 rounded-full hover:bg-gray-800"
+              className={`${darkMode ? 'text-white hover:bg-gray-700' : 'text-gray-900 hover:bg-gray-100'} p-2 rounded-full`}
               onClick={() => setShowSearchDialog(true)}
             >
               <i className="ri-search-line text-xl"></i>
             </button>
             <button 
-              className="text-white p-2 rounded-full hover:bg-gray-800"
+              className={`${darkMode ? 'text-white hover:bg-gray-700' : 'text-gray-900 hover:bg-gray-100'} p-2 rounded-full`}
               onClick={() => setShowCreatePlaylist(true)}
             >
               <i className="ri-add-line text-xl"></i>
@@ -238,17 +239,17 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
       {/* Main Content - Playlists */}
       {!selectedPlaylist ? (
         <div className="container mx-auto px-4 py-6">
-          <h2 className="text-xl font-medium mb-4">Playlists</h2>
+          <h2 className={`text-xl font-medium mb-4 lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>playlists</h2>
           
           {playlists.length === 0 ? (
-            <div className="bg-gray-900 rounded-md p-6 mb-4 text-center">
-              <p className="text-lightgray mb-4">You don't have any playlists yet.</p>
+            <div className={`${darkMode ? 'bg-gray-800' : 'bg-gray-100'} rounded-md p-6 mb-4 text-center`}>
+              <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-4 lowercase`}>you don't have any playlists yet.</p>
               <Button
                 onClick={() => setShowCreatePlaylist(true)}
-                className="bg-primary hover:bg-primary/80"
+                className="bg-primary hover:bg-primary/80 lowercase"
               >
                 <i className="ri-add-line mr-2"></i>
-                Create Your First Playlist
+                create your first playlist
               </Button>
             </div>
           ) : (
@@ -257,8 +258,9 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
                 <PlaylistCard 
                   key={playlist.id}
                   playlist={playlist}
-                  trackCount={getPlaylistTrackCount(playlist.id)}
+                  trackCount={playlistTracks.filter(track => track.categoryId === playlist.id).length}
                   onClick={() => handlePlaylistSelect(playlist)}
+                  darkMode={darkMode}
                 />
               ))}
             </div>
@@ -269,12 +271,12 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center mb-6">
             <button 
-              className="mr-4 p-2 hover:bg-gray-800 rounded-full"
+              className={`mr-4 p-2 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'} rounded-full`}
               onClick={handleBackToPlaylists}
             >
-              <i className="ri-arrow-left-line text-xl text-white"></i>
+              <i className={`ri-arrow-left-line text-xl ${darkMode ? 'text-white' : 'text-gray-900'}`}></i>
             </button>
-            <h2 className="text-2xl font-semibold text-white">{selectedPlaylist.name}</h2>
+            <h2 className={`text-2xl font-semibold lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>{selectedPlaylist.name.toLowerCase()}</h2>
           </div>
           
           <div 
@@ -289,11 +291,11 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
                 <i className={`${selectedPlaylist.icon} text-4xl text-white`}></i>
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">{selectedPlaylist.name}</h2>
-                <p className="text-lightgray">{playlistTracks.length} recordings · Created by you</p>
+                <h2 className={`text-2xl font-bold lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>{selectedPlaylist.name.toLowerCase()}</h2>
+                <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} lowercase`}>{playlistTracks.length} recordings · created by you</p>
                 <div className="flex mt-4 space-x-2">
                   <button 
-                    className="bg-primary text-white py-2 px-6 rounded-full font-medium hover:bg-opacity-80"
+                    className="bg-primary text-white py-2 px-6 rounded-full font-medium hover:bg-opacity-80 lowercase"
                     onClick={() => {
                       if (playlistTracks.length > 0) {
                         handlePlayTrack(playlistTracks[0]);
@@ -301,10 +303,10 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
                     }}
                     disabled={playlistTracks.length === 0}
                   >
-                    <i className="ri-play-fill mr-1"></i> Play All
+                    <i className="ri-play-fill mr-1"></i> play all
                   </button>
-                  <button className="bg-gray-800 text-white py-2 px-4 rounded-full font-medium hover:bg-gray-700">
-                    <i className="ri-add-line mr-1"></i> Add
+                  <button className={`${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'} py-2 px-4 rounded-full font-medium lowercase`}>
+                    <i className="ri-add-line mr-1"></i> add
                   </button>
                 </div>
               </div>
@@ -313,8 +315,8 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
           
           <div className="mt-4 space-y-3">
             {playlistTracks.length === 0 ? (
-              <div className="bg-gray-900 p-6 rounded-md text-center">
-                <p className="text-lightgray">This playlist is empty. Add tracks to get started.</p>
+              <div className={`${darkMode ? 'bg-gray-800' : 'bg-gray-100'} p-6 rounded-md text-center`}>
+                <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} lowercase`}>this playlist is empty. add tracks to get started.</p>
               </div>
             ) : (
               playlistTracks.map((track, index) => (
@@ -324,6 +326,7 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
                   index={index}
                   isPlaying={currentPlayingTrack?.id === track.id}
                   onPlay={() => handlePlayTrack(track)}
+                  darkMode={darkMode}
                 />
               ))
             )}
@@ -333,38 +336,38 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
       
       {/* Create Playlist Dialog */}
       <Dialog open={showCreatePlaylist} onOpenChange={setShowCreatePlaylist}>
-        <DialogContent className="bg-gray-900 border-gray-800">
+        <DialogContent className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
           <DialogHeader>
-            <DialogTitle className="text-white">Create New Playlist</DialogTitle>
-            <DialogDescription className="text-gray-400">Create a new playlist to organize your recordings</DialogDescription>
+            <DialogTitle className={`${darkMode ? 'text-white' : 'text-gray-900'} lowercase`}>create new playlist</DialogTitle>
+            <DialogDescription className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} lowercase`}>create a new playlist to organize your recordings</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="mb-4">
-              <label className="block text-sm font-medium text-lightgray mb-1">Playlist Name</label>
+              <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1 lowercase`}>playlist name</label>
               <Input
                 type="text"
                 value={newPlaylistName}
                 onChange={(e) => setNewPlaylistName(e.target.value)}
-                placeholder="Enter playlist name"
-                className="w-full bg-gray-800 border-gray-700 text-white"
+                placeholder="enter playlist name"
+                className={`w-full ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
               />
             </div>
             
             <div className="mb-4">
-              <label className="block text-sm font-medium text-lightgray mb-1">Icon</label>
+              <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1 lowercase`}>icon</label>
               <Select
                 value={newPlaylistIcon}
                 onValueChange={setNewPlaylistIcon}
               >
-                <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white">
-                  <SelectValue placeholder="Select an icon" />
+                <SelectTrigger className={`w-full ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}>
+                  <SelectValue placeholder="select an icon" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}>
                   {iconOptions.map(icon => (
-                    <SelectItem key={icon.value} value={icon.value}>
+                    <SelectItem key={icon.value} value={icon.value} className="lowercase">
                       <div className="flex items-center">
                         <i className={`${icon.value} mr-2`}></i>
-                        <span>{icon.label}</span>
+                        <span>{icon.label.toLowerCase()}</span>
                       </div>
                     </SelectItem>
                   ))}
@@ -373,23 +376,23 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
             </div>
             
             <div className="mb-4">
-              <label className="block text-sm font-medium text-lightgray mb-1">Color</label>
+              <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1 lowercase`}>color</label>
               <Select
                 value={newPlaylistColor}
                 onValueChange={setNewPlaylistColor}
               >
-                <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white">
-                  <SelectValue placeholder="Select a color" />
+                <SelectTrigger className={`w-full ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}>
+                  <SelectValue placeholder="select a color" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}>
                   {colorOptions.map(color => (
-                    <SelectItem key={color.value} value={color.value}>
+                    <SelectItem key={color.value} value={color.value} className="lowercase">
                       <div className="flex items-center">
                         <div 
                           className="w-4 h-4 rounded-full mr-2"
                           style={{ backgroundColor: color.value }}
                         ></div>
-                        <span>{color.label}</span>
+                        <span>{color.label.toLowerCase()}</span>
                       </div>
                     </SelectItem>
                   ))}
@@ -401,15 +404,15 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
             <Button 
               variant="outline" 
               onClick={() => setShowCreatePlaylist(false)}
-              className="border-gray-700 text-white"
+              className={`${darkMode ? 'border-gray-700 text-white' : 'border-gray-300 text-gray-700'} lowercase`}
             >
-              Cancel
+              cancel
             </Button>
             <Button 
               onClick={handleCreatePlaylist}
-              className="bg-primary hover:bg-primary/80"
+              className="bg-primary hover:bg-primary/80 lowercase"
             >
-              Create Playlist
+              create playlist
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -417,10 +420,10 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
 
       {/* Search Dialog */}
       <Dialog open={showSearchDialog} onOpenChange={setShowSearchDialog}>
-        <DialogContent className="bg-gray-900 border-gray-800">
+        <DialogContent className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
           <DialogHeader>
-            <DialogTitle className="text-white">Search</DialogTitle>
-            <DialogDescription className="text-gray-400">Search for playlists and recordings</DialogDescription>
+            <DialogTitle className={`${darkMode ? 'text-white' : 'text-gray-900'} lowercase`}>search</DialogTitle>
+            <DialogDescription className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} lowercase`}>search for playlists and recordings</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex space-x-2">
@@ -428,30 +431,30 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for playlists and recordings..."
-                className="w-full bg-gray-800 border-gray-700 text-white"
+                placeholder="search for playlists and recordings..."
+                className={`w-full ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
               />
               <Button 
-                className="bg-primary hover:bg-primary/80"
+                className="bg-primary hover:bg-primary/80 lowercase"
               >
-                Search
+                search
               </Button>
             </div>
             
             {searchQuery.trim() && (
               <div className="mt-4">
                 {searchResults.playlists.length === 0 && searchResults.tracks.length === 0 ? (
-                  <p className="text-lightgray text-center py-4">No results found</p>
+                  <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-center py-4 lowercase`}>no results found</p>
                 ) : (
                   <>
                     {searchResults.playlists.length > 0 && (
                       <div className="mb-6">
-                        <h3 className="text-white font-medium mb-2">Playlists</h3>
+                        <h3 className={`${darkMode ? 'text-white' : 'text-gray-900'} font-medium mb-2 lowercase`}>playlists</h3>
                         <div className="space-y-2">
                           {searchResults.playlists.map(playlist => (
                             <div 
                               key={playlist.id}
-                              className="bg-gray-800 p-3 rounded-md flex items-center cursor-pointer hover:bg-gray-700"
+                              className={`${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} p-3 rounded-md flex items-center cursor-pointer`}
                               onClick={() => {
                                 handlePlaylistSelect(playlist);
                                 setShowSearchDialog(false);
@@ -464,8 +467,8 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
                                 <i className={`${playlist.icon} text-white`}></i>
                               </div>
                               <div>
-                                <h4 className="text-white font-medium">{playlist.name}</h4>
-                                <p className="text-xs text-lightgray">{getPlaylistTrackCount(playlist.id)} recordings</p>
+                                <h4 className={`${darkMode ? 'text-white' : 'text-gray-900'} font-medium lowercase`}>{playlist.name.toLowerCase()}</h4>
+                                <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} lowercase`}>{playlistTracks.filter(track => track.categoryId === playlist.id).length} recordings</p>
                               </div>
                             </div>
                           ))}
@@ -475,23 +478,23 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
                     
                     {searchResults.tracks.length > 0 && (
                       <div>
-                        <h3 className="text-white font-medium mb-2">Recordings</h3>
+                        <h3 className={`${darkMode ? 'text-white' : 'text-gray-900'} font-medium mb-2 lowercase`}>recordings</h3>
                         <div className="space-y-2 max-h-60 overflow-y-auto">
                           {searchResults.tracks.map((track, index) => (
                             <div 
                               key={track.id}
-                              className="bg-gray-800 p-3 rounded-md flex items-center cursor-pointer hover:bg-gray-700"
+                              className={`${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} p-3 rounded-md flex items-center cursor-pointer`}
                               onClick={() => {
                                 handlePlayTrack(track);
                                 setShowSearchDialog(false);
                               }}
                             >
-                              <div className="w-8 h-8 rounded-md bg-gray-700 flex items-center justify-center mr-3">
+                              <div className={`w-8 h-8 rounded-md ${darkMode ? 'bg-gray-600' : 'bg-gray-300'} flex items-center justify-center mr-3`}>
                                 <i className="ri-music-fill text-primary"></i>
                               </div>
                               <div className="flex-grow">
-                                <h4 className="text-white font-medium">{track.name}</h4>
-                                <p className="text-xs text-lightgray">
+                                <h4 className={`${darkMode ? 'text-white' : 'text-gray-900'} font-medium lowercase`}>{track.name.toLowerCase()}</h4>
+                                <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                                   {typeof track.createdAt === 'string' 
                                     ? new Date(track.createdAt).toLocaleDateString() 
                                     : track.createdAt instanceof Date 
@@ -499,7 +502,7 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
                                       : 'No date'}
                                 </p>
                               </div>
-                              <div className="text-xs text-lightgray">
+                              <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                                 {Math.floor(track.duration / 60)}:{String(Math.floor(track.duration % 60)).padStart(2, '0')}
                               </div>
                             </div>
@@ -516,9 +519,9 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
             <Button 
               variant="outline" 
               onClick={() => setShowSearchDialog(false)}
-              className="border-gray-700 text-white"
+              className={`${darkMode ? 'border-gray-700 text-white' : 'border-gray-300 text-gray-700'} lowercase`}
             >
-              Close
+              close
             </Button>
           </DialogFooter>
         </DialogContent>
