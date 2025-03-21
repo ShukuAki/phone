@@ -139,8 +139,39 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
     { value: "#9C27B0", label: "Purple" },
   ];
 
-  // Search function
-  const handleSearch = () => {
+  // All tracks state for search
+  const [allTracks, setAllTracks] = useState<Track[]>([]);
+  const [isLoadingTracks, setIsLoadingTracks] = useState(false);
+
+  // Fetch all tracks for search when dialog opens
+  useEffect(() => {
+    if (showSearchDialog && allTracks.length === 0) {
+      setIsLoadingTracks(true);
+      fetch('/api/tracks', {
+        credentials: 'include'
+      })
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to fetch tracks');
+          return res.json();
+        })
+        .then(data => {
+          setAllTracks(data);
+          setIsLoadingTracks(false);
+        })
+        .catch(err => {
+          console.error('Error fetching tracks:', err);
+          setIsLoadingTracks(false);
+          toast({
+            title: "Error",
+            description: "Failed to load tracks for search",
+            variant: "destructive"
+          });
+        });
+    }
+  }, [showSearchDialog, toast]);
+
+  // Live search function
+  useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults({ playlists: [], tracks: [] });
       return;
@@ -153,45 +184,16 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
       playlist.name.toLowerCase().includes(query)
     );
     
-    // Filter tracks by name - we'll need to fetch all tracks first
-    const fetchTracksForSearch = async () => {
-      try {
-        const response = await fetch('/api/tracks', {
-          credentials: 'include'
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch tracks for search');
-        }
-        
-        const allTracks = await response.json();
-        
-        const filteredTracks = allTracks.filter((track: Track) => 
-          track.name.toLowerCase().includes(query)
-        );
-        
-        setSearchResults({
-          playlists: filteredPlaylists,
-          tracks: filteredTracks
-        });
-      } catch (error) {
-        console.error('Error searching tracks:', error);
-        toast({
-          title: "Error",
-          description: "Failed to search tracks",
-          variant: "destructive"
-        });
-        
-        // Still set filtered playlists even if track search fails
-        setSearchResults({
-          playlists: filteredPlaylists,
-          tracks: []
-        });
-      }
-    };
+    // Filter tracks by name
+    const filteredTracks = allTracks.filter(track => 
+      track.name.toLowerCase().includes(query)
+    );
     
-    fetchTracksForSearch();
-  };
+    setSearchResults({
+      playlists: filteredPlaylists,
+      tracks: filteredTracks
+    });
+  }, [searchQuery, playlists, allTracks]);
   
   // Helper to count tracks per playlist
   const getPlaylistTrackCount = (playlistId: number) => {
@@ -443,7 +445,6 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
                 className="w-full bg-gray-800 border-gray-700 text-white"
               />
               <Button 
-                onClick={handleSearch}
                 className="bg-primary hover:bg-primary/80"
               >
                 Search
@@ -504,7 +505,11 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
                               <div className="flex-grow">
                                 <h4 className="text-white font-medium">{track.name}</h4>
                                 <p className="text-xs text-lightgray">
-                                  {new Date(track.createdAt).toLocaleDateString()}
+                                  {typeof track.createdAt === 'string' 
+                                    ? new Date(track.createdAt).toLocaleDateString() 
+                                    : track.createdAt instanceof Date 
+                                      ? track.createdAt.toLocaleDateString()
+                                      : 'No date'}
                                 </p>
                               </div>
                               <div className="text-xs text-lightgray">
