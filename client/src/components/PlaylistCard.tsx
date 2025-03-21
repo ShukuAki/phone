@@ -4,12 +4,13 @@ interface PlaylistCardProps {
   playlist: Playlist;
   trackCount: number;
   onClick: () => void;
+  darkMode?: boolean;
 }
 
-export default function PlaylistCard({ playlist, trackCount, onClick }: PlaylistCardProps) {
+export default function PlaylistCard({ playlist, trackCount, onClick, darkMode = false }: PlaylistCardProps) {
   return (
     <div 
-      className="bg-gray-900 rounded-md p-4 mb-4 shadow-md hover:bg-gray-800 transition duration-200 cursor-pointer"
+      className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'} rounded-md p-4 mb-4 shadow-md transition duration-200 cursor-pointer`}
       onClick={onClick}
     >
       <div className="flex items-center">
@@ -20,10 +21,10 @@ export default function PlaylistCard({ playlist, trackCount, onClick }: Playlist
           <i className={`${playlist.icon} text-2xl text-white`}></i>
         </div>
         <div className="flex-grow">
-          <h3 className="font-medium text-white">{playlist.name}</h3>
-          <p className="text-sm text-lightgray">{trackCount} recordings</p>
+          <h3 className={`font-medium lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>{playlist.name.toLowerCase()}</h3>
+          <p className={`text-sm lowercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{trackCount} recordings</p>
         </div>
-        <button className="text-white p-2 hover:bg-gray-700 rounded-full">
+        <button className={`${darkMode ? 'text-white hover:bg-gray-700' : 'text-gray-900 hover:bg-gray-200'} p-2 rounded-full`}>
           <i className="ri-more-2-fill"></i>
         </button>
       </div>

@@ -9,7 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
-export default function UploadPage() {
+interface UploadPageProps {
+  darkMode?: boolean;
+}
+
+export default function UploadPage({ darkMode = false }: UploadPageProps) {
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
   const [showUploadOptions, setShowUploadOptions] = useState(false);
   const [showRecorder, setShowRecorder] = useState(false);
