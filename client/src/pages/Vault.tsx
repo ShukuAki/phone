@@ -5,7 +5,7 @@ import TrackItem from "@/components/TrackItem";
 import { Playlist, Track, Category } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -19,6 +19,12 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
   const [playlistTracks, setPlaylistTracks] = useState<Track[]>([]);
   const [currentPlayingTrack, setCurrentPlayingTrack] = useState<Track | null>(null);
   const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
+  const [showSearchDialog, setShowSearchDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<{
+    playlists: Playlist[];
+    tracks: Track[];
+  }>({ playlists: [], tracks: [] });
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [newPlaylistColor, setNewPlaylistColor] = useState("#1DB954");
   const [newPlaylistIcon, setNewPlaylistIcon] = useState("ri-music-fill");
@@ -133,6 +139,60 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
     { value: "#9C27B0", label: "Purple" },
   ];
 
+  // Search function
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      setSearchResults({ playlists: [], tracks: [] });
+      return;
+    }
+    
+    const query = searchQuery.toLowerCase();
+    
+    // Filter playlists by name
+    const filteredPlaylists = playlists.filter(playlist => 
+      playlist.name.toLowerCase().includes(query)
+    );
+    
+    // Filter tracks by name - we'll need to fetch all tracks first
+    const fetchTracksForSearch = async () => {
+      try {
+        const response = await fetch('/api/tracks', {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch tracks for search');
+        }
+        
+        const allTracks = await response.json();
+        
+        const filteredTracks = allTracks.filter((track: Track) => 
+          track.name.toLowerCase().includes(query)
+        );
+        
+        setSearchResults({
+          playlists: filteredPlaylists,
+          tracks: filteredTracks
+        });
+      } catch (error) {
+        console.error('Error searching tracks:', error);
+        toast({
+          title: "Error",
+          description: "Failed to search tracks",
+          variant: "destructive"
+        });
+        
+        // Still set filtered playlists even if track search fails
+        setSearchResults({
+          playlists: filteredPlaylists,
+          tracks: []
+        });
+      }
+    };
+    
+    fetchTracksForSearch();
+  };
+  
   // Helper to count tracks per playlist
   const getPlaylistTrackCount = (playlistId: number) => {
     // In a real app, you would fetch this from the API or have it in the playlist object
@@ -153,7 +213,10 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-white">The Vault</h1>
           <div className="flex space-x-3">
-            <button className="text-white p-2 rounded-full hover:bg-gray-800">
+            <button 
+              className="text-white p-2 rounded-full hover:bg-gray-800"
+              onClick={() => setShowSearchDialog(true)}
+            >
               <i className="ri-search-line text-xl"></i>
             </button>
             <button 
@@ -284,6 +347,7 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
         <DialogContent className="bg-gray-900 border-gray-800">
           <DialogHeader>
             <DialogTitle className="text-white">Create New Playlist</DialogTitle>
+            <DialogDescription className="text-gray-400">Create a new playlist to organize your recordings</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="mb-4">
@@ -357,6 +421,112 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
               className="bg-primary hover:bg-primary/80"
             >
               Create Playlist
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Search Dialog */}
+      <Dialog open={showSearchDialog} onOpenChange={setShowSearchDialog}>
+        <DialogContent className="bg-gray-900 border-gray-800">
+          <DialogHeader>
+            <DialogTitle className="text-white">Search</DialogTitle>
+            <DialogDescription className="text-gray-400">Search for playlists and recordings</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex space-x-2">
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search for playlists and recordings..."
+                className="w-full bg-gray-800 border-gray-700 text-white"
+              />
+              <Button 
+                onClick={handleSearch}
+                className="bg-primary hover:bg-primary/80"
+              >
+                Search
+              </Button>
+            </div>
+            
+            {searchQuery.trim() && (
+              <div className="mt-4">
+                {searchResults.playlists.length === 0 && searchResults.tracks.length === 0 ? (
+                  <p className="text-lightgray text-center py-4">No results found</p>
+                ) : (
+                  <>
+                    {searchResults.playlists.length > 0 && (
+                      <div className="mb-6">
+                        <h3 className="text-white font-medium mb-2">Playlists</h3>
+                        <div className="space-y-2">
+                          {searchResults.playlists.map(playlist => (
+                            <div 
+                              key={playlist.id}
+                              className="bg-gray-800 p-3 rounded-md flex items-center cursor-pointer hover:bg-gray-700"
+                              onClick={() => {
+                                handlePlaylistSelect(playlist);
+                                setShowSearchDialog(false);
+                              }}
+                            >
+                              <div 
+                                className="w-10 h-10 rounded-md flex items-center justify-center mr-3"
+                                style={{ backgroundColor: playlist.color }}
+                              >
+                                <i className={`${playlist.icon} text-white`}></i>
+                              </div>
+                              <div>
+                                <h4 className="text-white font-medium">{playlist.name}</h4>
+                                <p className="text-xs text-lightgray">{getPlaylistTrackCount(playlist.id)} recordings</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {searchResults.tracks.length > 0 && (
+                      <div>
+                        <h3 className="text-white font-medium mb-2">Recordings</h3>
+                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                          {searchResults.tracks.map((track, index) => (
+                            <div 
+                              key={track.id}
+                              className="bg-gray-800 p-3 rounded-md flex items-center cursor-pointer hover:bg-gray-700"
+                              onClick={() => {
+                                handlePlayTrack(track);
+                                setShowSearchDialog(false);
+                              }}
+                            >
+                              <div className="w-8 h-8 rounded-md bg-gray-700 flex items-center justify-center mr-3">
+                                <i className="ri-music-fill text-primary"></i>
+                              </div>
+                              <div className="flex-grow">
+                                <h4 className="text-white font-medium">{track.name}</h4>
+                                <p className="text-xs text-lightgray">
+                                  {new Date(track.createdAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <div className="text-xs text-lightgray">
+                                {Math.floor(track.duration / 60)}:{String(Math.floor(track.duration % 60)).padStart(2, '0')}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowSearchDialog(false)}
+              className="border-gray-700 text-white"
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
