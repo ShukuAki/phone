@@ -305,10 +305,8 @@ export default function VaultPage({ onPlayTrack, darkMode = false }: VaultPagePr
                   >
                     <i className="ri-play-fill mr-1"></i> play all
                   </button>
-                  <button 
-                    className={`${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'} py-2 px-4 rounded-full font-medium lowercase`}
-                    onClick={() => window.location.href = `/upload?playlistId=${selectedPlaylist.id}`}
-                  >
+                  <button className={`${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'} py-2 px-4 rounded-full font-medium lowercase`}>
+
                     <i className="ri-add-line mr-1"></i> add
                   </button>
                 </div>

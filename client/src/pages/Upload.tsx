@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Playlist } from "@shared/schema";
 import { Button } from "@/components/ui/button";
@@ -24,33 +24,6 @@ export default function UploadPage({ darkMode = false }: UploadPageProps) {
   
   const { toast } = useToast();
   
-  // Check for playlistId in URL parameters
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const playlistId = urlParams.get('playlistId');
-    if (playlistId && !selectedPlaylist) {
-      // Fetch the playlist details and auto-select it
-      fetch(`/api/playlists/${playlistId}`, {
-        credentials: 'include'
-      })
-        .then(res => {
-          if (!res.ok) throw new Error('Failed to fetch playlist');
-          return res.json();
-        })
-        .then(playlist => {
-          setSelectedPlaylist(playlist);
-          setShowUploadOptions(true);
-        })
-        .catch(err => {
-          console.error('Error fetching playlist:', err);
-          toast({
-            title: "Error",
-            description: "Could not find the specified playlist",
-            variant: "destructive"
-          });
-        });
-    }
-  }, [playlists]);
 
   // Fetch playlists
   const { data: playlists = [], isLoading: isLoadingPlaylists, refetch: refetchPlaylists } = useQuery<Playlist[]>({
@@ -331,12 +304,11 @@ export default function UploadPage({ darkMode = false }: UploadPageProps) {
         {/* Recorder Interface */}
         {showRecorder && selectedPlaylist && (
           <Recorder 
-            categoryId={selectedPlaylist.id} // Using playlist ID directly
+            categoryId={0}
             categoryName={selectedPlaylist.name}
             onSaveComplete={handleRecorderComplete}
             onCancel={handleRecorderBack}
             playlists={playlists}
-            preSelectedPlaylistId={selectedPlaylist.id.toString()}
           />
         )}
       </div>
