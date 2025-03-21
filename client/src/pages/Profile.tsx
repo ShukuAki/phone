@@ -7,7 +7,11 @@ import { Input } from "@/components/ui/input";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
-export default function ProfilePage() {
+interface ProfilePageProps {
+  darkMode?: boolean;
+}
+
+export default function ProfilePage({ darkMode = false }: ProfilePageProps) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -128,14 +132,14 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen pb-20">
-      <header className="bg-darkgray sticky top-0 z-10 shadow-md">
+      <header className={`${darkMode ? 'bg-gray-800' : 'bg-white'} sticky top-0 z-10 shadow-md`}>
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-white">Profile</h1>
+          <h1 className={`text-2xl font-semibold lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>profile</h1>
           <Button
             onClick={handleOpenEditModal}
-            className="text-white bg-gray-800 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-700"
+            className={`${darkMode ? 'text-white bg-gray-700 hover:bg-gray-600' : 'text-gray-800 bg-gray-100 hover:bg-gray-200'} px-4 py-2 rounded-full text-sm font-medium lowercase`}
           >
-            Edit
+            edit
           </Button>
         </div>
       </header>
@@ -151,146 +155,146 @@ export default function ProfilePage() {
               <i className="ri-camera-fill text-white"></i>
             </button>
           </div>
-          <h2 className="text-xl font-bold text-white">{user.fullName || user.username}</h2>
-          <p className="text-lightgray">{user.email || "No email set"}</p>
+          <h2 className={`text-xl font-bold lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>{(user.fullName || user.username).toLowerCase()}</h2>
+          <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} lowercase`}>{(user.email || "no email set").toLowerCase()}</p>
         </div>
         
-        <div className="bg-gray-900 rounded-lg p-5 mb-6">
-          <h3 className="text-lg font-medium mb-4">Account Information</h3>
+        <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg p-5 mb-6 border`}>
+          <h3 className={`text-lg font-medium mb-4 lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>account information</h3>
           
           <div className="mb-4">
-            <label className="block text-sm text-lightgray mb-1">Username</label>
-            <div className="text-white py-1">{user.username}</div>
+            <label className={`block text-sm mb-1 lowercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>username</label>
+            <div className={`py-1 lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>{user.username.toLowerCase()}</div>
           </div>
           
           <div className="mb-4">
-            <label className="block text-sm text-lightgray mb-1">Email</label>
-            <div className="text-white py-1">{user.email || "Not set"}</div>
+            <label className={`block text-sm mb-1 lowercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>email</label>
+            <div className={`py-1 lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>{(user.email || "not set").toLowerCase()}</div>
           </div>
           
           <div>
-            <label className="block text-sm text-lightgray mb-1">Phone</label>
-            <div className="text-white py-1">{user.phone || "Not set"}</div>
+            <label className={`block text-sm mb-1 lowercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>phone</label>
+            <div className={`py-1 lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>{(user.phone || "not set").toLowerCase()}</div>
           </div>
         </div>
         
-        <div className="bg-gray-900 rounded-lg p-5 mb-6">
-          <h3 className="text-lg font-medium mb-4">Storage</h3>
+        <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg p-5 mb-6 border`}>
+          <h3 className={`text-lg font-medium mb-4 lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>storage</h3>
           
           <div className="mb-3">
             <div className="flex justify-between mb-1">
-              <span className="text-sm text-lightgray">Used Storage</span>
-              <span className="text-sm text-white">0.4 GB / 1 GB</span>
+              <span className={`text-sm lowercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>used storage</span>
+              <span className={`text-sm ${darkMode ? 'text-white' : 'text-gray-900'}`}>0.4 GB / 1 GB</span>
             </div>
-            <div className="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+            <div className={`w-full h-2 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-full overflow-hidden`}>
               <div className="bg-primary h-full rounded-full" style={{ width: "40%" }}></div>
             </div>
           </div>
           
-          <button className="text-primary text-sm font-medium">
-            Upgrade Storage
+          <button className="text-primary text-sm font-medium lowercase">
+            upgrade storage
           </button>
         </div>
         
-        <div className="bg-gray-900 rounded-lg p-5 mb-6">
-          <h3 className="text-lg font-medium mb-4">Statistics</h3>
+        <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg p-5 mb-6 border`}>
+          <h3 className={`text-lg font-medium mb-4 lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>statistics</h3>
           
           <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="bg-gray-800 rounded-md p-3">
-              <div className="text-2xl font-bold text-white">0</div>
-              <div className="text-xs text-lightgray">Recordings</div>
+            <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-md p-3`}>
+              <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>0</div>
+              <div className={`text-xs lowercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>recordings</div>
             </div>
-            <div className="bg-gray-800 rounded-md p-3">
-              <div className="text-2xl font-bold text-white">0</div>
-              <div className="text-xs text-lightgray">Playlists</div>
+            <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-md p-3`}>
+              <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>0</div>
+              <div className={`text-xs lowercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>playlists</div>
             </div>
-            <div className="bg-gray-800 rounded-md p-3">
-              <div className="text-2xl font-bold text-white">0</div>
-              <div className="text-xs text-lightgray">Categories</div>
+            <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-md p-3`}>
+              <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>0</div>
+              <div className={`text-xs lowercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>categories</div>
             </div>
           </div>
         </div>
         
         <div className="flex justify-center mt-8">
-          <button className="text-lightgray hover:text-white font-medium">
-            Sign Out
+          <button className={`${darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'} font-medium lowercase`}>
+            sign out
           </button>
         </div>
       </div>
       
       {/* Edit Profile Modal */}
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-        <DialogContent className="bg-gray-900 border-gray-800">
+        <DialogContent className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
           <DialogHeader>
-            <DialogTitle className="text-white">Edit Profile</DialogTitle>
+            <DialogTitle className={`${darkMode ? 'text-white' : 'text-gray-900'} lowercase`}>edit profile</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div className="mb-4">
-                <label htmlFor="fullName" className="block text-sm font-medium text-lightgray mb-1">
-                  Full Name
+                <label htmlFor="fullName" className={`block text-sm font-medium mb-1 lowercase ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  full name
                 </label>
                 <Input
                   type="text"
                   id="fullName"
                   name="fullName"
-                  className="w-full bg-gray-800 border-gray-700 text-white"
+                  className={`w-full lowercase ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                   value={formData.fullName}
                   onChange={handleInputChange}
                 />
               </div>
               
               <div className="mb-4">
-                <label htmlFor="username" className="block text-sm font-medium text-lightgray mb-1">
-                  Username
+                <label htmlFor="username" className={`block text-sm font-medium mb-1 lowercase ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  username
                 </label>
                 <Input
                   type="text"
                   id="username"
                   name="username"
-                  className="w-full bg-gray-800 border-gray-700 text-white"
+                  className={`w-full lowercase ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                   value={formData.username}
                   onChange={handleInputChange}
                 />
               </div>
               
               <div className="mb-4">
-                <label htmlFor="email" className="block text-sm font-medium text-lightgray mb-1">
-                  Email
+                <label htmlFor="email" className={`block text-sm font-medium mb-1 lowercase ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  email
                 </label>
                 <Input
                   type="email"
                   id="email"
                   name="email"
-                  className="w-full bg-gray-800 border-gray-700 text-white"
+                  className={`w-full lowercase ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                   value={formData.email}
                   onChange={handleInputChange}
                 />
               </div>
               
               <div className="mb-4">
-                <label htmlFor="phone" className="block text-sm font-medium text-lightgray mb-1">
-                  Phone
+                <label htmlFor="phone" className={`block text-sm font-medium mb-1 lowercase ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  phone
                 </label>
                 <Input
                   type="tel"
                   id="phone"
                   name="phone"
-                  className="w-full bg-gray-800 border-gray-700 text-white"
+                  className={`w-full lowercase ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                   value={formData.phone}
                   onChange={handleInputChange}
                 />
               </div>
               
               <div className="mb-4">
-                <label htmlFor="password" className="block text-sm font-medium text-lightgray mb-1">
-                  New Password (leave blank to keep current)
+                <label htmlFor="password" className={`block text-sm font-medium mb-1 lowercase ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  new password (leave blank to keep current)
                 </label>
                 <Input
                   type="password"
                   id="password"
                   name="password"
-                  className="w-full bg-gray-800 border-gray-700 text-white"
+                  className={`w-full ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="••••••••"
@@ -303,15 +307,15 @@ export default function ProfilePage() {
                 type="button"
                 variant="outline"
                 onClick={() => setShowEditModal(false)}
-                className="border-gray-700 text-white"
+                className={`${darkMode ? 'border-gray-700 text-white' : 'border-gray-300 text-gray-700'} lowercase`}
               >
-                Cancel
+                cancel
               </Button>
               <Button
                 type="submit"
-                className="bg-primary hover:bg-primary/80"
+                className="bg-primary hover:bg-primary/80 lowercase"
               >
-                Save Changes
+                save changes
               </Button>
             </div>
           </form>

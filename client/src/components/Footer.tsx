@@ -1,6 +1,10 @@
 import { useLocation } from "wouter";
 
-export default function Footer() {
+interface FooterProps {
+  darkMode?: boolean;
+}
+
+export default function Footer({ darkMode = false }: FooterProps) {
   const [location, setLocation] = useLocation();
 
   return (

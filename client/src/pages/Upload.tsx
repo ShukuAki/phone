@@ -204,9 +204,9 @@ export default function UploadPage({ darkMode = false }: UploadPageProps) {
 
   return (
     <div className="min-h-screen pb-20">
-      <header className="bg-darkgray sticky top-0 z-10 shadow-md">
+      <header className={`${darkMode ? 'bg-gray-800' : 'bg-white'} sticky top-0 z-10 shadow-md opacity-100`}>
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-white">Upload</h1>
+          <h1 className={`text-2xl font-semibold lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>upload</h1>
         </div>
       </header>
       
@@ -214,33 +214,33 @@ export default function UploadPage({ darkMode = false }: UploadPageProps) {
         {/* Playlist Selection */}
         {!showUploadOptions && !showRecorder && (
           <>
-            <h2 className="text-xl font-medium mb-6">Select a Playlist</h2>
+            <h2 className={`text-xl font-medium mb-6 lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>select a playlist</h2>
             
             <div className="space-y-3 mb-8">
               {playlists.map(playlist => (
                 <div 
                   key={playlist.id}
-                  className="bg-gray-900 rounded-md p-4 hover:bg-gray-800 transition duration-200 cursor-pointer"
+                  className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'} rounded-md p-4 shadow-md transition duration-200 cursor-pointer border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}
                   onClick={() => handlePlaylistSelect(playlist)}
                 >
                   <div className="flex items-center">
                     <div className="mr-3" style={{ color: playlist.color }}>
                       <i className={`${playlist.icon} text-xl`}></i>
                     </div>
-                    <h3 className="font-medium text-white">{playlist.name}</h3>
+                    <h3 className={`font-medium lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>{playlist.name.toLowerCase()}</h3>
                   </div>
                 </div>
               ))}
               
               <div 
-                className="bg-gray-900 rounded-md p-4 hover:bg-gray-800 transition duration-200 cursor-pointer"
+                className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'} rounded-md p-4 shadow-md transition duration-200 cursor-pointer border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}
                 onClick={() => setShowCreatePlaylist(true)}
               >
                 <div className="flex items-center">
-                  <div className="text-purple-500 mr-3">
+                  <div className="text-primary mr-3">
                     <i className="ri-add-line text-xl"></i>
                   </div>
-                  <h3 className="font-medium text-white">Create New Playlist</h3>
+                  <h3 className={`font-medium lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>create new playlist</h3>
                 </div>
               </div>
             </div>
@@ -254,18 +254,18 @@ export default function UploadPage({ darkMode = false }: UploadPageProps) {
               <div className="flex items-center mb-2">
                 <Button 
                   variant="ghost" 
-                  className="mr-4 p-2 hover:bg-gray-800 rounded-full" 
+                  className={`mr-4 p-2 ${darkMode ? 'hover:bg-gray-700 text-white' : 'hover:bg-gray-100 text-gray-900'} rounded-full`} 
                   onClick={handleBackToPlaylists}
                 >
-                  <i className="ri-arrow-left-line text-xl text-white"></i>
+                  <i className="ri-arrow-left-line text-xl"></i>
                 </Button>
-                <h2 className="text-xl font-medium">{selectedPlaylist.name}</h2>
+                <h2 className={`text-xl font-medium lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>{selectedPlaylist.name.toLowerCase()}</h2>
               </div>
-              <p className="text-lightgray text-sm">Select how you want to add your audio</p>
+              <p className={`text-sm lowercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>select how you want to add your audio</p>
             </div>
             
             <div className="flex flex-col space-y-4">
-              <label className="bg-gray-900 hover:bg-gray-800 p-6 rounded-lg flex items-center justify-center transition duration-200 cursor-pointer">
+              <label className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'} p-6 rounded-lg flex items-center justify-center transition duration-200 cursor-pointer border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
                 <input
                   type="file"
                   accept="audio/*"
@@ -279,21 +279,21 @@ export default function UploadPage({ darkMode = false }: UploadPageProps) {
                   >
                     <i className="ri-upload-cloud-fill text-white text-3xl"></i>
                   </div>
-                  <h3 className="font-medium text-white text-lg">Upload Audio File</h3>
-                  <p className="text-lightgray text-sm mt-2">MP3, WAV, M4A files supported</p>
+                  <h3 className={`font-medium text-lg lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>upload audio file</h3>
+                  <p className={`text-sm mt-2 lowercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>mp3, wav, m4a files supported</p>
                 </div>
               </label>
               
               <button 
-                className="bg-gray-900 hover:bg-gray-800 p-6 rounded-lg flex items-center justify-center transition duration-200 cursor-pointer"
+                className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'} p-6 rounded-lg flex items-center justify-center transition duration-200 cursor-pointer border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}
                 onClick={handleShowRecorder}
               >
                 <div className="text-center">
                   <div className="bg-primary w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4">
                     <i className="ri-mic-fill text-white text-3xl"></i>
                   </div>
-                  <h3 className="font-medium text-white text-lg">Record New Audio</h3>
-                  <p className="text-lightgray text-sm mt-2">Record directly from your device</p>
+                  <h3 className={`font-medium text-lg lowercase ${darkMode ? 'text-white' : 'text-gray-900'}`}>record new audio</h3>
+                  <p className={`text-sm mt-2 lowercase ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>record directly from your device</p>
                 </div>
               </button>
             </div>
@@ -314,38 +314,38 @@ export default function UploadPage({ darkMode = false }: UploadPageProps) {
       
       {/* Create Playlist Dialog */}
       <Dialog open={showCreatePlaylist} onOpenChange={setShowCreatePlaylist}>
-        <DialogContent className="bg-gray-900 border-gray-800">
+        <DialogContent className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
           <DialogHeader>
-            <DialogTitle className="text-white">Create New Playlist</DialogTitle>
-            <DialogDescription className="text-gray-400">Create a new playlist to organize your recordings</DialogDescription>
+            <DialogTitle className={`${darkMode ? 'text-white' : 'text-gray-900'} lowercase`}>create new playlist</DialogTitle>
+            <DialogDescription className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} lowercase`}>create a new playlist to organize your recordings</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="mb-4">
-              <label className="block text-sm font-medium text-lightgray mb-1">Playlist Name</label>
+              <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1 lowercase`}>playlist name</label>
               <Input
                 type="text"
                 value={newPlaylistName}
                 onChange={(e) => setNewPlaylistName(e.target.value)}
-                placeholder="Enter playlist name"
-                className="w-full bg-gray-800 border-gray-700 text-white"
+                placeholder="enter playlist name"
+                className={`w-full ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
               />
             </div>
             
             <div className="mb-4">
-              <label className="block text-sm font-medium text-lightgray mb-1">Icon</label>
+              <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1 lowercase`}>icon</label>
               <Select
                 value={newPlaylistIcon}
                 onValueChange={setNewPlaylistIcon}
               >
-                <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white">
-                  <SelectValue placeholder="Select an icon" />
+                <SelectTrigger className={`w-full ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}>
+                  <SelectValue placeholder="select an icon" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}>
                   {iconOptions.map(icon => (
-                    <SelectItem key={icon.value} value={icon.value}>
+                    <SelectItem key={icon.value} value={icon.value} className="lowercase">
                       <div className="flex items-center">
                         <i className={`${icon.value} mr-2`}></i>
-                        <span>{icon.label}</span>
+                        <span>{icon.label.toLowerCase()}</span>
                       </div>
                     </SelectItem>
                   ))}
@@ -354,23 +354,23 @@ export default function UploadPage({ darkMode = false }: UploadPageProps) {
             </div>
             
             <div className="mb-4">
-              <label className="block text-sm font-medium text-lightgray mb-1">Color</label>
+              <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1 lowercase`}>color</label>
               <Select
                 value={newPlaylistColor}
                 onValueChange={setNewPlaylistColor}
               >
-                <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white">
-                  <SelectValue placeholder="Select a color" />
+                <SelectTrigger className={`w-full ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}>
+                  <SelectValue placeholder="select a color" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}>
                   {colorOptions.map(color => (
-                    <SelectItem key={color.value} value={color.value}>
+                    <SelectItem key={color.value} value={color.value} className="lowercase">
                       <div className="flex items-center">
                         <div 
                           className="w-4 h-4 rounded-full mr-2"
                           style={{ backgroundColor: color.value }}
                         ></div>
-                        <span>{color.label}</span>
+                        <span>{color.label.toLowerCase()}</span>
                       </div>
                     </SelectItem>
                   ))}
@@ -382,15 +382,15 @@ export default function UploadPage({ darkMode = false }: UploadPageProps) {
             <Button 
               variant="outline" 
               onClick={() => setShowCreatePlaylist(false)}
-              className="border-gray-700 text-white"
+              className={`${darkMode ? 'border-gray-700 text-white' : 'border-gray-300 text-gray-700'} lowercase`}
             >
-              Cancel
+              cancel
             </Button>
             <Button 
               onClick={handleCreatePlaylist}
-              className="bg-primary hover:bg-primary/80"
+              className="bg-primary hover:bg-primary/80 lowercase"
             >
-              Create Playlist
+              create playlist
             </Button>
           </DialogFooter>
         </DialogContent>
