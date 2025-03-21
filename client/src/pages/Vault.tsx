@@ -248,34 +248,17 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
               </Button>
             </div>
           ) : (
-            playlists.map(playlist => (
-              <PlaylistCard 
-                key={playlist.id}
-                playlist={playlist}
-                trackCount={getPlaylistTrackCount(playlist.id)}
-                onClick={() => handlePlaylistSelect(playlist)}
-              />
-            ))
+            <div className="space-y-3">
+              {playlists.map(playlist => (
+                <PlaylistCard 
+                  key={playlist.id}
+                  playlist={playlist}
+                  trackCount={getPlaylistTrackCount(playlist.id)}
+                  onClick={() => handlePlaylistSelect(playlist)}
+                />
+              ))}
+            </div>
           )}
-          
-          <h2 className="text-xl font-medium mb-4 mt-8">Categories</h2>
-          <div className="grid grid-cols-2 gap-3">
-            {categories.map(category => (
-              <div 
-                key={category.id}
-                className="bg-gray-900 rounded-md p-4 hover:bg-gray-800 transition duration-200 cursor-pointer"
-              >
-                <div className="mb-2" style={{ color: category.color }}>
-                  <i className={`${category.icon} text-xl`}></i>
-                </div>
-                <h3 className="font-medium text-white">{category.name}</h3>
-                <p className="text-xs text-lightgray mt-1">
-                  {/* In a real app, fetch the actual count */}
-                  {Math.floor(Math.random() * 20)} recordings
-                </p>
-              </div>
-            ))}
-          </div>
         </div>
       ) : (
         // Playlist Detail View

@@ -1,41 +1,37 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Category, Playlist } from "@shared/schema";
+import { Playlist } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import Recorder from "@/components/Recorder";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function UploadPage() {
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
   const [showUploadOptions, setShowUploadOptions] = useState(false);
   const [showRecorder, setShowRecorder] = useState(false);
-  const [showCreateCategory, setShowCreateCategory] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [newCategoryIcon, setNewCategoryIcon] = useState("ri-mic-fill");
-  const [newCategoryColor, setNewCategoryColor] = useState("#1DB954");
+  const [showCreatePlaylist, setShowCreatePlaylist] = useState(false);
+  const [newPlaylistName, setNewPlaylistName] = useState("");
+  const [newPlaylistIcon, setNewPlaylistIcon] = useState("ri-music-fill");
+  const [newPlaylistColor, setNewPlaylistColor] = useState("#1DB954");
   
   const { toast } = useToast();
 
-  // Fetch categories
-  const { data: categories = [], isLoading: isLoadingCategories, refetch: refetchCategories } = useQuery<Category[]>({
-    queryKey: ['/api/categories'],
-  });
-
-  // Fetch playlists for the recorder
-  const { data: playlists = [] } = useQuery<Playlist[]>({
+  // Fetch playlists
+  const { data: playlists = [], isLoading: isLoadingPlaylists } = useQuery<Playlist[]>({
     queryKey: ['/api/playlists'],
   });
 
-  const handleCategorySelect = (category: Category) => {
-    setSelectedCategory(category);
+  const handlePlaylistSelect = (playlist: Playlist) => {
+    setSelectedPlaylist(playlist);
     setShowUploadOptions(true);
   };
 
-  const handleBackToCategories = () => {
-    setSelectedCategory(null);
+  const handleBackToPlaylists = () => {
+    setSelectedPlaylist(null);
     setShowUploadOptions(false);
   };
 
@@ -52,56 +48,49 @@ export default function UploadPage() {
   const handleRecorderComplete = () => {
     setShowRecorder(false);
     setShowUploadOptions(false);
-    setSelectedCategory(null);
+    setSelectedPlaylist(null);
     toast({
       title: "Success",
       description: "Your recording has been saved successfully",
     });
   };
 
-  const handleCreateCategory = async () => {
-    if (!newCategoryName.trim()) {
+  const handleCreatePlaylist = async () => {
+    if (!newPlaylistName.trim()) {
       toast({
         title: "Error",
-        description: "Please enter a category name",
+        description: "Please enter a playlist name",
         variant: "destructive"
       });
       return;
     }
 
     try {
-      const response = await fetch('/api/categories', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: newCategoryName,
-          icon: newCategoryIcon,
-          color: newCategoryColor,
-        }),
-        credentials: 'include'
+      const response = await apiRequest('POST', '/api/playlists', {
+        name: newPlaylistName,
+        color: newPlaylistColor,
+        icon: newPlaylistIcon
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create category');
+        throw new Error('Failed to create playlist');
       }
 
-      // Refetch categories
-      refetchCategories();
+      // Invalidate playlists query to refetch
+      queryClient.invalidateQueries({ queryKey: ['/api/playlists'] });
       
-      setShowCreateCategory(false);
-      setNewCategoryName("");
+      setShowCreatePlaylist(false);
+      setNewPlaylistName("");
       
       toast({
         title: "Success",
-        description: "Category created successfully",
+        description: "Playlist created successfully",
       });
     } catch (error) {
-      console.error('Error creating category:', error);
+      console.error('Error creating playlist:', error);
       toast({
         title: "Error",
-        description: "Failed to create category",
+        description: "Failed to create playlist",
         variant: "destructive"
       });
     }
@@ -127,7 +116,7 @@ export default function UploadPage() {
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !selectedCategory) return;
+    if (!file || !selectedPlaylist) return;
     
     // Check if it's an audio file
     if (!file.type.startsWith('audio/')) {
@@ -143,7 +132,6 @@ export default function UploadPage() {
     const formData = new FormData();
     formData.append('audio', file);
     formData.append('name', file.name.replace(/\.[^/.]+$/, '')); // Remove extension
-    formData.append('categoryId', selectedCategory.id.toString());
     formData.append('duration', '0'); // We'll update this after the upload
     
     // Upload the file
@@ -156,13 +144,37 @@ export default function UploadPage() {
         if (!response.ok) throw new Error('Upload failed');
         return response.json();
       })
-      .then(() => {
-        toast({
-          title: "Success",
-          description: "Your audio file has been uploaded successfully",
+      .then((track) => {
+        // Add the track to the playlist
+        fetch(`/api/playlists/${selectedPlaylist.id}/tracks`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            trackId: track.id,
+            position: 9999 // Add to the end
+          }),
+          credentials: 'include'
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to add track to playlist');
+          
+          toast({
+            title: "Success",
+            description: "Your audio file has been uploaded and added to the playlist",
+          });
+          setShowUploadOptions(false);
+          setSelectedPlaylist(null);
+        })
+        .catch(error => {
+          console.error('Error adding to playlist:', error);
+          toast({
+            title: "Warning",
+            description: "File uploaded but couldn't add to playlist",
+            variant: "destructive"
+          });
         });
-        setShowUploadOptions(false);
-        setSelectedCategory(null);
       })
       .catch(error => {
         console.error('Upload error:', error);
@@ -174,7 +186,7 @@ export default function UploadPage() {
       });
   };
 
-  if (isLoadingCategories) {
+  if (isLoadingPlaylists) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -191,51 +203,55 @@ export default function UploadPage() {
       </header>
       
       <div className="container mx-auto px-4 py-6">
-        {/* Category Selection */}
+        {/* Playlist Selection */}
         {!showUploadOptions && !showRecorder && (
           <>
-            <h2 className="text-xl font-medium mb-6">Select a Category</h2>
+            <h2 className="text-xl font-medium mb-6">Select a Playlist</h2>
             
-            <div className="grid grid-cols-2 gap-3 mb-8">
-              {categories.map(category => (
+            <div className="space-y-3 mb-8">
+              {playlists.map(playlist => (
                 <div 
-                  key={category.id}
+                  key={playlist.id}
                   className="bg-gray-900 rounded-md p-4 hover:bg-gray-800 transition duration-200 cursor-pointer"
-                  onClick={() => handleCategorySelect(category)}
+                  onClick={() => handlePlaylistSelect(playlist)}
                 >
-                  <div className="mb-2" style={{ color: category.color }}>
-                    <i className={`${category.icon} text-xl`}></i>
+                  <div className="flex items-center">
+                    <div className="mr-3" style={{ color: playlist.color }}>
+                      <i className={`${playlist.icon} text-xl`}></i>
+                    </div>
+                    <h3 className="font-medium text-white">{playlist.name}</h3>
                   </div>
-                  <h3 className="font-medium text-white">{category.name}</h3>
                 </div>
               ))}
               
               <div 
-                className="bg-gray-900 rounded-md p-4 hover:bg-gray-800 transition duration-200 cursor-pointer col-span-2"
-                onClick={() => setShowCreateCategory(true)}
+                className="bg-gray-900 rounded-md p-4 hover:bg-gray-800 transition duration-200 cursor-pointer"
+                onClick={() => setShowCreatePlaylist(true)}
               >
-                <div className="text-purple-500 mb-2">
-                  <i className="ri-folder-add-fill text-xl"></i>
+                <div className="flex items-center">
+                  <div className="text-purple-500 mr-3">
+                    <i className="ri-add-line text-xl"></i>
+                  </div>
+                  <h3 className="font-medium text-white">Create New Playlist</h3>
                 </div>
-                <h3 className="font-medium text-white">Create New Category</h3>
               </div>
             </div>
           </>
         )}
         
         {/* Upload Options */}
-        {showUploadOptions && selectedCategory && (
+        {showUploadOptions && selectedPlaylist && (
           <div>
             <div className="mb-6">
               <div className="flex items-center mb-2">
                 <Button 
                   variant="ghost" 
                   className="mr-4 p-2 hover:bg-gray-800 rounded-full" 
-                  onClick={handleBackToCategories}
+                  onClick={handleBackToPlaylists}
                 >
                   <i className="ri-arrow-left-line text-xl text-white"></i>
                 </Button>
-                <h2 className="text-xl font-medium">{selectedCategory.name}</h2>
+                <h2 className="text-xl font-medium">{selectedPlaylist.name}</h2>
               </div>
               <p className="text-lightgray text-sm">Select how you want to add your audio</p>
             </div>
@@ -251,7 +267,7 @@ export default function UploadPage() {
                 <div className="text-center">
                   <div 
                     className="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4"
-                    style={{ backgroundColor: selectedCategory.color }}
+                    style={{ backgroundColor: selectedPlaylist.color }}
                   >
                     <i className="ri-upload-cloud-fill text-white text-3xl"></i>
                   </div>
@@ -277,10 +293,10 @@ export default function UploadPage() {
         )}
         
         {/* Recorder Interface */}
-        {showRecorder && selectedCategory && (
+        {showRecorder && selectedPlaylist && (
           <Recorder 
-            categoryId={selectedCategory.id}
-            categoryName={selectedCategory.name}
+            categoryId={0} // Not using categories anymore
+            categoryName={selectedPlaylist.name}
             onSaveComplete={handleRecorderComplete}
             onCancel={handleRecorderBack}
             playlists={playlists}
@@ -288,20 +304,21 @@ export default function UploadPage() {
         )}
       </div>
       
-      {/* Create Category Dialog */}
-      <Dialog open={showCreateCategory} onOpenChange={setShowCreateCategory}>
+      {/* Create Playlist Dialog */}
+      <Dialog open={showCreatePlaylist} onOpenChange={setShowCreatePlaylist}>
         <DialogContent className="bg-gray-900 border-gray-800">
           <DialogHeader>
-            <DialogTitle className="text-white">Create New Category</DialogTitle>
+            <DialogTitle className="text-white">Create New Playlist</DialogTitle>
+            <DialogDescription className="text-gray-400">Create a new playlist to organize your recordings</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="mb-4">
-              <label className="block text-sm font-medium text-lightgray mb-1">Category Name</label>
+              <label className="block text-sm font-medium text-lightgray mb-1">Playlist Name</label>
               <Input
                 type="text"
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-                placeholder="Enter category name"
+                value={newPlaylistName}
+                onChange={(e) => setNewPlaylistName(e.target.value)}
+                placeholder="Enter playlist name"
                 className="w-full bg-gray-800 border-gray-700 text-white"
               />
             </div>
@@ -309,8 +326,8 @@ export default function UploadPage() {
             <div className="mb-4">
               <label className="block text-sm font-medium text-lightgray mb-1">Icon</label>
               <Select
-                value={newCategoryIcon}
-                onValueChange={setNewCategoryIcon}
+                value={newPlaylistIcon}
+                onValueChange={setNewPlaylistIcon}
               >
                 <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white">
                   <SelectValue placeholder="Select an icon" />
@@ -331,8 +348,8 @@ export default function UploadPage() {
             <div className="mb-4">
               <label className="block text-sm font-medium text-lightgray mb-1">Color</label>
               <Select
-                value={newCategoryColor}
-                onValueChange={setNewCategoryColor}
+                value={newPlaylistColor}
+                onValueChange={setNewPlaylistColor}
               >
                 <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white">
                   <SelectValue placeholder="Select a color" />
@@ -356,16 +373,16 @@ export default function UploadPage() {
           <DialogFooter>
             <Button 
               variant="outline" 
-              onClick={() => setShowCreateCategory(false)}
+              onClick={() => setShowCreatePlaylist(false)}
               className="border-gray-700 text-white"
             >
               Cancel
             </Button>
             <Button 
-              onClick={handleCreateCategory}
+              onClick={handleCreatePlaylist}
               className="bg-primary hover:bg-primary/80"
             >
-              Create Category
+              Create Playlist
             </Button>
           </DialogFooter>
         </DialogContent>
