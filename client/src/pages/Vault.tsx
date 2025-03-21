@@ -32,7 +32,7 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
   const { toast } = useToast();
 
   // Fetch playlists
-  const { data: playlists = [], isLoading: isLoadingPlaylists } = useQuery<Playlist[]>({
+  const { data: playlists = [], isLoading: isLoadingPlaylists, refetch: refetchPlaylists } = useQuery<Playlist[]>({
     queryKey: ['/api/playlists'],
   });
 
@@ -101,11 +101,15 @@ export default function VaultPage({ onPlayTrack }: VaultPageProps) {
         throw new Error('Failed to create playlist');
       }
 
-      // Invalidate playlists query to refetch
-      queryClient.invalidateQueries({ queryKey: ['/api/playlists'] });
-      
+      // Clear the form
       setShowCreatePlaylist(false);
       setNewPlaylistName("");
+      
+      // First invalidate the queries
+      await queryClient.invalidateQueries({ queryKey: ['/api/playlists'] });
+      
+      // Then explicitly refetch to ensure UI updates
+      await refetchPlaylists();
       
       toast({
         title: "Success",
